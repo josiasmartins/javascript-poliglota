@@ -14,7 +14,27 @@ export class SessionFactory {
         console.log(this.store);
     }
 
-    openSession() {
-        
+    async openSession() {
+        const connection = await createConnection(
+            this.dbName,
+            this.dbVersion,
+            this.stores
+        );
+
+        return new Session(connection, this.stores)
     }
+}
+
+class Session {
+
+    constructor(connection, stores) {
+        this.connection = connection;
+        this.stores = stores;
+    }
+}
+
+function createConnection(dbName, dbVersion, stores) {
+    return new Promise((resolve, reject) => {
+        resolve('conexão');
+    });
 }
