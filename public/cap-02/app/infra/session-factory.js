@@ -3,9 +3,9 @@ export class SessionFactory {
     constructor(config) {
         this.dbName = config.dbName;
         this.dbVersion = config.dbVersion;
-        this.store = new Map();
+        this.stores = new Map();
         config.mappers.forEach(mapper => {
-            this.store.set(
+            this.stores.set(
                 mapper.clazz.name,
                 mapper.converter
             );
@@ -31,6 +31,43 @@ class Session {
         this.connection = connection;
         this.stores = stores;
     }
+
+    save(object) {
+        return new Promise((resolve, reject) => {
+            const storeName = object.constructor.name;
+            const request = this.connection 
+                .transaction([storeName], 'readwrite')
+                .objectStore(storeName)
+                .add(object);
+            request.onsuccess = e => resolve();
+            request.onerror = e => {
+                console.log(e.target.error);
+                reject(`Não foi possível persistir o objeto na store ${storeName}`);
+            }
+        });
+    }
+
+    list(clazz) {
+        return new Promise((resolve, reject) => {
+            const storeName = clazz.name;
+            const store = this.connection
+                .transaction([storeName], 'readwrite')
+                .objectStore(storeName);
+            const cursor = store.openCursor();
+            const converter = this.stores.get(storeName);
+            const list = [];
+            cursor.onsuccess = e => {
+                const current = e.target.result;
+                if (current) {
+                    const value = current.value;
+                    list.push(converter(value));
+                    current.continue();
+                } else {
+                    resolve(list);
+                }
+            }
+        })
+    }
 }
 
 function createConnection(dbName, dbVersion, stores) {
@@ -38,14 +75,14 @@ function createConnection(dbName, dbVersion, stores) {
         const request = window.indexedDB.open(dbName, dbVersion);
         request.onupgradeneeded = e => {
             const transactionalConnection = e.target.result;
-            for ([key, value] of stores) {
+            for (let [key, value] of stores) {
                 const store = key;
 
                 if (transactionalConnection.objectStoreNames.contains(store)) {
                     transactionalConnection.deleteObjectStore(store);
                 }
 
-                transactionalConnection.createObjectStore(store, { autoIncrement: true });
+                transactionalConnection.createObjectStore(store, { keyPath: 'BOMID', autoIncrement: true });
             }
         };
 

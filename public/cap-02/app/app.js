@@ -16,6 +16,19 @@ import { SessionFactory } from './infra/session-factory.js';
                 converter: data => new Animal(data.name)
             }
         ]
-    }).openSession();
-    console.log(session, 'ibag');
+    })
+    .openSession()
+
+    const person = new Person('Flavio', 'Almeida');
+    const animal = new Animal('Calopsita');
+
+    await session.save(person);
+    await session.save(animal);
+
+    const people = await session.list(Person);
+    people.forEach(person => console.log(person.getFullName()));
+    const animals = await session.list(Animal);
+    animals.forEach(animal => console.log(animal));
+    console.log(animals);
+
 })().catch(e => console.log(e));
