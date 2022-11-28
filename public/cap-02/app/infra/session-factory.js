@@ -35,6 +35,28 @@ class Session {
 
 function createConnection(dbName, dbVersion, stores) {
     return new Promise((resolve, reject) => {
-        resolve('conexão');
+        const request = window.indexedDB.open(dbName, dbVersion);
+        request.onupgradeneeded = e => {
+            const transactionalConnection = e.target.result;
+            for ([key, value] of stores) {
+                const store = key;
+
+                if (transactionalConnection.objectStoreNames.contains(store)) {
+                    transactionalConnection.deleteObjectStore(store);
+                }
+
+                transactionalConnection.createObjectStore(store, { autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = e => {
+            const connection = e.target.result;
+            resolve(connection);
+        };
+        
+        request.onerror = e => {
+            console.log(e.target.error);
+            reject(`Não foi possível obter a conexão com o banco ${dbVersion}`)
+        }
     });
 }
