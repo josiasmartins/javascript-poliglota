@@ -1,3 +1,4 @@
-export function calculaImc(peso, altura) {
+// Destructuring Assignment
+export function calculaImc({ peso, altura }) {
     return peso / (altura * altura);
 }
