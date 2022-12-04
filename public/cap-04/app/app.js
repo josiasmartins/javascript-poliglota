@@ -21,3 +21,16 @@ const f1 = fatorial(4);
 const f2 = fatorial(3);
 console.log(f1)
 console.log(f2)
+
+const fetchHandler = res => 
+    res.ok ? res.json() : Promise.reject(res.statusText);
+
+const getNotaFromId = id => 
+    fetch(`http://localhost:3000/notas/${id}`)
+        .then(fetchHandler);
+// getNotaFromId(1)
+//     .then(console.log);
+const getNotaFromIdM = memoizer(getNotaFromId);
+getNotaFromIdM(1)
+    .then(console.log)
+    .then(getNotaFromIdM(1))
