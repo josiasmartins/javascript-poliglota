@@ -1,4 +1,6 @@
-import { ActiveRecord } from './infra/active-record';
+import { Person } from './models/person.js';
+import { Animal } from './models/animal.js';
+import { ActiveRecord } from './infra/active-record.js';
 
 
 (async () => {
@@ -16,5 +18,10 @@ import { ActiveRecord } from './infra/active-record';
             }
         ]
     })
-    .init()
+    .init();
+
+    const person = new Person('Flavio', 'Almeida');
+    await person.save();
+    const animal = new Animal('capivara');
+    await animal.save();
 })();

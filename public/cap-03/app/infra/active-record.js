@@ -12,6 +12,7 @@ export class ActiveRecord {
                 mapper.clazz.name, 
                 mapper.converter
             );
+            mapper.clazz.prototype.save = save;
         })
     }
 
@@ -24,6 +25,24 @@ export class ActiveRecord {
         console.log(connection);
     }
 
+}
+
+function save() {
+    return new Promise((resolve, reject) => {
+        // resolve('Salvar dados');
+        // alert('Salvou')
+        const object = this;
+        const storeName = object.constructor.name;
+        const request = connection
+            .transaction([storeName], 'readwrite')
+            .objectStore(storeName)
+            .add(object);
+        request.onsuccess = e => resolve();
+        request.onerror = e => {
+            console.log(e.target.result);
+            reject(`Não foi possível persistir o objeto da store ${storeName}`);
+        }
+    })
 }
 
 function createConnection(dbName, dbVersion, stores) {
