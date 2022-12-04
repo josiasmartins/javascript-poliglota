@@ -1,7 +1,7 @@
 export function memoizer(fn) {
     const cache = new Map();
     // rest operators
-    return (...args) => {
+    const newfn = (...args) => {
         // transforma numa string
         const key = JSON.stringify(args);
         if (cache.has(key)) {
@@ -16,4 +16,11 @@ export function memoizer(fn) {
             return result;
         }
     }
+    // apaga o cache
+    newfn.release = () => {
+        console.log('limpando o cache')
+        cache.clear();
+    };
+
+    return newfn;
 }
