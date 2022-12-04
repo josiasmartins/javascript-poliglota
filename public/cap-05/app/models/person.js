@@ -5,6 +5,16 @@ export class Person {
     }
 
     getFullName() {
-        return `${this.name} ${this.surname}`;
+        console.time('getFullName')
+        const fullName = `${this.name} ${this.surname}`;
+        console.timeEnd('getFullName');
+        return fullName;
+    }
+
+    speak(text) {
+        console.time('speak');
+        const phrase = `${this.name} esta falando... ${text}`;
+        console.timeEnd('speak');
+        return phrase;
     }
 }
